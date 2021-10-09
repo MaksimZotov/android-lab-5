@@ -7,9 +7,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity_4_3 : AppCompatActivity() {
-    companion object {
-        private const val SECONDS_ELAPSED_KEY = "SECONDS_ELAPSED_KEY"
-    }
+    private val SECONDS_ELAPSED_KEY = "SECONDS_ELAPSED_KEY"
 
     private lateinit var sharedPreferences: SharedPreferences
 

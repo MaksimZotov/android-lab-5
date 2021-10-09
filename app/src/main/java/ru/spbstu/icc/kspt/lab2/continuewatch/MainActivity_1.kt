@@ -5,9 +5,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity_1 : AppCompatActivity() {
-    companion object {
-        private const val TAG = "LIFECYCLE"
-    }
+    private val TAG = "LIFECYCLE"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
