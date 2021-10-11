@@ -13,14 +13,16 @@ class MainActivity_4_2 : AppCompatActivity() {
     private var secondsElapsed = 0
 
     private val backgroundThread = Thread {
-        while (true) {
-            Thread.sleep(1000)
-            if (updateSeconds) {
-                textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, ++secondsElapsed)
+        try {
+            while (true) {
+                Thread.sleep(1000)
+                if (updateSeconds) {
+                    textSecondsElapsed.post {
+                        textSecondsElapsed.text = getString(R.string.seconds_elapsed, ++secondsElapsed)
+                    }
                 }
             }
-        }
+        } catch (ex: InterruptedException) { }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,5 +52,10 @@ class MainActivity_4_2 : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         secondsElapsed = savedInstanceState.getInt(SECONDS_ELAPSED_KEY)
         textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+    }
+
+    override fun onDestroy() {
+        backgroundThread.interrupt()
+        super.onDestroy()
     }
 }
