@@ -1,13 +1,16 @@
-package ru.spbstu.icc.kspt.lab2.continuewatch
+package ru.spbstu.icc.kspt.lab2.continuewatch.task1
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import ru.spbstu.icc.kspt.lab2.continuewatch.R
 
-class MainActivity_4_3 : AppCompatActivity() {
-    private val SECONDS_ELAPSED_KEY = "SECONDS_ELAPSED_KEY"
+class MainActivity1_1 : AppCompatActivity() {
+    companion object {
+        private const val SECONDS_ELAPSED_KEY = "SECONDS_ELAPSED_KEY"
+    }
 
     private lateinit var sharedPreferences: SharedPreferences
 
