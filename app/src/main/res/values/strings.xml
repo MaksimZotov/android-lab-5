@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Continue Watch</string>
     <string name="seconds_elapsed">Seconds elapsed: %d</string>
-    <string name="seconds_elapsed_key">seconds_elapsed_key</string>
+    <string name="milliseconds_elapsed_key">seconds_elapsed_key</string>
+    <string name="download">download</string>
+    <string name="todo">TODO</string>
 </resources>

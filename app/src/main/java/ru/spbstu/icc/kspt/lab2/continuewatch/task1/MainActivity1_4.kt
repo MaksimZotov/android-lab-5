@@ -9,35 +9,23 @@ import androidx.appcompat.app.AppCompatActivity
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
 
-class MainActivity1_1 : AppCompatActivity() {
+class MainActivity1_4 : AppCompatActivity() {
     companion object {
-        private const val TAG = "MainActivity1_1"
+        private const val TAG = "MainActivity1_4"
         private const val MILLISECONDS_ELAPSED_KEY = "MILLISECONDS_KEY"
+        private const val ONE_SECOND = 1000L
     }
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var textSecondsElapsed: TextView
     private var initMilliseconds = 0L
     private var millisecondsElapsed = 0L
-    private var secondsElapsed = 0
-
-    private val backgroundThread = Thread {
-        try {
-            while (true) {
-                Thread.sleep(1000)
-                textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, ++secondsElapsed)
-                }
-                Log.i(TAG, "Incremented seconds: $secondsElapsed")
-            }
-        } catch (ex: InterruptedException) {
-            Log.i(TAG, "Thread is interrupted")
-        }
-    }
+    private val timer = Timer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         sharedPreferences = getSharedPreferences(
             getString(R.string.milliseconds_elapsed_key),
             Context.MODE_PRIVATE
@@ -52,17 +40,23 @@ class MainActivity1_1 : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Log.i(TAG, "onResume")
+
         initMilliseconds = Date().time
-        secondsElapsed = millisecondsElapsed.toSeconds()
-        backgroundThread.start()
+        var secondsElapsed = millisecondsElapsed.toSeconds()
+
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                textSecondsElapsed.post {
+                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, ++secondsElapsed)
+                }
+                Log.i(TAG, "Incremented seconds: $secondsElapsed")
+            }
+        }, ONE_SECOND, ONE_SECOND)
     }
 
     override fun onPause() {
         super.onPause()
-        Log.i(TAG, "onPause")
-        backgroundThread.interrupt()
-        millisecondsElapsed += (Date().time - initMilliseconds)
+        timer.cancel()
     }
 
     override fun onStop() {

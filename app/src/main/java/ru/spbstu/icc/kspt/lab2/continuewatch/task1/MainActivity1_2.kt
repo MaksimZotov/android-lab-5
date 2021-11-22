@@ -8,10 +8,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
+import java.util.concurrent.Executors
 
-class MainActivity1_1 : AppCompatActivity() {
+class MainActivity1_2 : AppCompatActivity() {
     companion object {
-        private const val TAG = "MainActivity1_1"
+        private const val TAG = "MainActivity1_2"
         private const val MILLISECONDS_ELAPSED_KEY = "MILLISECONDS_KEY"
     }
 
@@ -19,21 +20,7 @@ class MainActivity1_1 : AppCompatActivity() {
     private lateinit var textSecondsElapsed: TextView
     private var initMilliseconds = 0L
     private var millisecondsElapsed = 0L
-    private var secondsElapsed = 0
-
-    private val backgroundThread = Thread {
-        try {
-            while (true) {
-                Thread.sleep(1000)
-                textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, ++secondsElapsed)
-                }
-                Log.i(TAG, "Incremented seconds: $secondsElapsed")
-            }
-        } catch (ex: InterruptedException) {
-            Log.i(TAG, "Thread is interrupted")
-        }
-    }
+    private val executorService = Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,15 +40,32 @@ class MainActivity1_1 : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "onResume")
+
         initMilliseconds = Date().time
-        secondsElapsed = millisecondsElapsed.toSeconds()
-        backgroundThread.start()
+        var secondsElapsed = millisecondsElapsed.toSeconds()
+
+        executorService.execute {
+            try {
+                while (true) {
+                    Thread.sleep(1000)
+                    textSecondsElapsed.post {
+                        textSecondsElapsed.text = getString(
+                            R.string.seconds_elapsed,
+                            ++secondsElapsed
+                        )
+                    }
+                    Log.i(TAG, "Incremented seconds: $secondsElapsed")
+                }
+            } catch (ex: InterruptedException) {
+                Log.i(TAG, "Thread is interrupted")
+            }
+        }
     }
 
     override fun onPause() {
         super.onPause()
         Log.i(TAG, "onPause")
-        backgroundThread.interrupt()
+        executorService.shutdownNow()
         millisecondsElapsed += (Date().time - initMilliseconds)
     }
 

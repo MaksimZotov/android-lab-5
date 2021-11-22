@@ -6,12 +6,15 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
+import java.util.concurrent.Executors
 
-class MainActivity1_1 : AppCompatActivity() {
+class MainActivity1_3 : AppCompatActivity() {
     companion object {
-        private const val TAG = "MainActivity1_1"
+        private const val TAG = "MainActivity1_3"
         private const val MILLISECONDS_ELAPSED_KEY = "MILLISECONDS_KEY"
     }
 
@@ -21,23 +24,10 @@ class MainActivity1_1 : AppCompatActivity() {
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
 
-    private val backgroundThread = Thread {
-        try {
-            while (true) {
-                Thread.sleep(1000)
-                textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, ++secondsElapsed)
-                }
-                Log.i(TAG, "Incremented seconds: $secondsElapsed")
-            }
-        } catch (ex: InterruptedException) {
-            Log.i(TAG, "Thread is interrupted")
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         sharedPreferences = getSharedPreferences(
             getString(R.string.milliseconds_elapsed_key),
             Context.MODE_PRIVATE
@@ -48,21 +38,25 @@ class MainActivity1_1 : AppCompatActivity() {
             R.string.seconds_elapsed,
             millisecondsElapsed.toSeconds()
         )
+
+        lifecycleScope.launchWhenResumed {
+            while (true) {
+                delay(1000)
+                textSecondsElapsed.post {
+                    textSecondsElapsed.text = getString(
+                        R.string.seconds_elapsed,
+                        ++secondsElapsed
+                    )
+                }
+                Log.i(TAG, "Incremented seconds: $secondsElapsed")
+            }
+        }
     }
 
     override fun onResume() {
-        super.onResume()
-        Log.i(TAG, "onResume")
         initMilliseconds = Date().time
         secondsElapsed = millisecondsElapsed.toSeconds()
-        backgroundThread.start()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.i(TAG, "onPause")
-        backgroundThread.interrupt()
-        millisecondsElapsed += (Date().time - initMilliseconds)
+        super.onResume()
     }
 
     override fun onStop() {
