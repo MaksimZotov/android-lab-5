@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class MainActivity1_2 : AppCompatActivity() {
@@ -20,7 +21,23 @@ class MainActivity1_2 : AppCompatActivity() {
     private lateinit var textSecondsElapsed: TextView
     private var initMilliseconds = 0L
     private var millisecondsElapsed = 0L
-    private val executorService = Executors.newSingleThreadExecutor()
+    private var secondsElapsed = 0
+
+    private lateinit var executorService: ExecutorService
+    private val threadRunnable = Runnable {
+        try {
+            Log.i(TAG, "Thread is launched")
+            while (true) {
+                Log.i(TAG, "Seconds: $secondsElapsed")
+                textSecondsElapsed.post {
+                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed++)
+                }
+                Thread.sleep(1000)
+            }
+        } catch (ex: InterruptedException) {
+            Log.i(TAG, "Thread is interrupted")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,26 +57,9 @@ class MainActivity1_2 : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "onResume")
-
         initMilliseconds = Date().time
-        var secondsElapsed = millisecondsElapsed.toSeconds()
-
-        executorService.execute {
-            try {
-                while (true) {
-                    Thread.sleep(1000)
-                    textSecondsElapsed.post {
-                        textSecondsElapsed.text = getString(
-                            R.string.seconds_elapsed,
-                            ++secondsElapsed
-                        )
-                    }
-                    Log.i(TAG, "Incremented seconds: $secondsElapsed")
-                }
-            } catch (ex: InterruptedException) {
-                Log.i(TAG, "Thread is interrupted")
-            }
-        }
+        secondsElapsed = millisecondsElapsed.toSeconds()
+        executorService = Executors.newSingleThreadExecutor().apply { execute(threadRunnable) }
     }
 
     override fun onPause() {

@@ -21,14 +21,16 @@ class MainActivity1_1 : AppCompatActivity() {
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
 
-    private val backgroundThread = Thread {
+    private lateinit var backgroundThread: Thread
+    private val threadRunnable = Runnable {
         try {
+            Log.i(TAG, "Thread is launched")
             while (true) {
-                Thread.sleep(1000)
+                Log.i(TAG, "Seconds: $secondsElapsed")
                 textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, ++secondsElapsed)
+                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed++)
                 }
-                Log.i(TAG, "Incremented seconds: $secondsElapsed")
+                Thread.sleep(1000)
             }
         } catch (ex: InterruptedException) {
             Log.i(TAG, "Thread is interrupted")
@@ -55,7 +57,7 @@ class MainActivity1_1 : AppCompatActivity() {
         Log.i(TAG, "onResume")
         initMilliseconds = Date().time
         secondsElapsed = millisecondsElapsed.toSeconds()
-        backgroundThread.start()
+        backgroundThread = Thread(threadRunnable).apply { start() }
     }
 
     override fun onPause() {

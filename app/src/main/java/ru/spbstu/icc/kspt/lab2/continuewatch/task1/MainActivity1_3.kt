@@ -10,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
-import java.util.concurrent.Executors
 
 class MainActivity1_3 : AppCompatActivity() {
     companion object {
@@ -41,22 +40,26 @@ class MainActivity1_3 : AppCompatActivity() {
 
         lifecycleScope.launchWhenResumed {
             while (true) {
-                delay(1000)
+                Log.i(TAG, "Seconds: $secondsElapsed")
                 textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(
-                        R.string.seconds_elapsed,
-                        ++secondsElapsed
-                    )
+                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed++)
                 }
-                Log.i(TAG, "Incremented seconds: $secondsElapsed")
+                delay(1000)
             }
         }
     }
 
     override fun onResume() {
+        Log.i(TAG, "onResume")
         initMilliseconds = Date().time
         secondsElapsed = millisecondsElapsed.toSeconds()
         super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i(TAG, "onPause")
+        millisecondsElapsed += (Date().time - initMilliseconds)
     }
 
     override fun onStop() {
