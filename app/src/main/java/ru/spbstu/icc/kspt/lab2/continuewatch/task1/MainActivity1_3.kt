@@ -41,9 +41,7 @@ class MainActivity1_3 : AppCompatActivity() {
         lifecycleScope.launchWhenResumed {
             while (true) {
                 Log.i(TAG, "Seconds: $secondsElapsed")
-                textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed++)
-                }
+                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed++)
                 delay(1000)
             }
         }
