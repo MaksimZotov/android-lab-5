@@ -7,9 +7,9 @@ import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
+import ru.spbstu.icc.kspt.lab2.continuewatch.getExecutorService
 import java.util.*
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 class MainActivity1_2 : AppCompatActivity() {
     companion object {
@@ -23,14 +23,17 @@ class MainActivity1_2 : AppCompatActivity() {
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
 
-    private lateinit var executorService: ExecutorService
+    private var task: Future<*>? = null
     private val threadRunnable = Runnable {
         try {
             Log.i(TAG, "Thread is launched")
             while (true) {
                 Log.i(TAG, "Seconds: $secondsElapsed")
                 textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed++)
+                    textSecondsElapsed.text = getString(
+                        R.string.seconds_elapsed,
+                        secondsElapsed++
+                    )
                 }
                 Thread.sleep(1000)
             }
@@ -59,13 +62,13 @@ class MainActivity1_2 : AppCompatActivity() {
         Log.i(TAG, "onResume")
         initMilliseconds = Date().time
         secondsElapsed = millisecondsElapsed.toSeconds()
-        executorService = Executors.newSingleThreadExecutor().apply { execute(threadRunnable) }
+        task = application.getExecutorService()?.submit(threadRunnable)
     }
 
     override fun onPause() {
         super.onPause()
         Log.i(TAG, "onPause")
-        executorService.shutdownNow()
+        task?.cancel(true)
         millisecondsElapsed += (Date().time - initMilliseconds)
     }
 
