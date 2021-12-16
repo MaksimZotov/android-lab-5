@@ -20,8 +20,6 @@ class MainActivity4 : AppCompatActivity() {
         val image = findViewById<ImageView>(R.id.iv_image)
         val download = findViewById<Button>(R.id.btn_download)
 
-        download.setOnClickListener {
-            image.load(URL)
-        }
+        download.setOnClickListener { image.load(URL) }
     }
 }
