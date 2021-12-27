@@ -7,8 +7,7 @@ import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
 
@@ -23,6 +22,8 @@ class MainActivity1_3 : AppCompatActivity() {
     private var initMilliseconds = 0L
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
+    private var startTime = 0L
+    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +39,14 @@ class MainActivity1_3 : AppCompatActivity() {
             R.string.seconds_elapsed,
             millisecondsElapsed.toSeconds()
         )
+    }
 
-        lifecycleScope.launchWhenResumed {
-            var startTime = Date().time
+    override fun onResume() {
+        super.onResume()
+        Log.i(TAG, "onResume")
+        initMilliseconds = Date().time
+        secondsElapsed = millisecondsElapsed.toSeconds()
+        job = lifecycleScope.launch(Dispatchers.Main) {
             try {
                 Log.i(TAG, "Coroutine is launched")
 
@@ -50,7 +56,8 @@ class MainActivity1_3 : AppCompatActivity() {
 
                 Log.i(
                     TAG, "DIF between milliseconds " +
-                            "and next seconds: $difMillisecondsAndNextSeconds")
+                            "and next seconds: $difMillisecondsAndNextSeconds"
+                )
 
                 Log.i(TAG, "Seconds (first): $secondsElapsed")
 
@@ -58,16 +65,18 @@ class MainActivity1_3 : AppCompatActivity() {
                     textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
                 }
 
-                Thread.sleep(difMillisecondsAndNextSeconds)
+                startTime = Date().time
+                delay(difMillisecondsAndNextSeconds)
 
                 var nextDelay = 1000L
                 while (true) {
                     Log.i(TAG, "Seconds: ${++secondsElapsed}")
                     textSecondsElapsed.post {
-                        textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+                        textSecondsElapsed.text =
+                            getString(R.string.seconds_elapsed, secondsElapsed)
                     }
                     startTime = Date().time
-                    Thread.sleep(nextDelay)
+                    delay(nextDelay)
                     val endTime = Date().time
                     val correction = endTime - startTime - 1000
                     nextDelay = (1000 - correction)
@@ -82,16 +91,10 @@ class MainActivity1_3 : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        Log.i(TAG, "onResume")
-        initMilliseconds = Date().time
-        secondsElapsed = millisecondsElapsed.toSeconds()
-        super.onResume()
-    }
-
     override fun onPause() {
         super.onPause()
         Log.i(TAG, "onPause")
+        job?.cancel()
     }
 
     override fun onStop() {
