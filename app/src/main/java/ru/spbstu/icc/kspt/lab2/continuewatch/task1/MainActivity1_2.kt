@@ -28,18 +28,20 @@ class MainActivity1_2 : AppCompatActivity() {
         var startTime = Date().time
         try {
             Log.i(TAG, "Thread is launched")
-            Log.i(TAG, "Seconds (first): $secondsElapsed")
-
-            textSecondsElapsed.post {
-                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
-            }
 
             val difMillisecondsAndNextSeconds =
                 if (millisecondsElapsed == 0L) 1000
                 else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
 
-            Log.i(TAG, "DIF between milliseconds " +
+            Log.i(
+                TAG, "DIF between milliseconds " +
                     "and next seconds: $difMillisecondsAndNextSeconds")
+
+            Log.i(TAG, "Seconds (first): $secondsElapsed")
+
+            textSecondsElapsed.post {
+                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+            }
 
             Thread.sleep(difMillisecondsAndNextSeconds)
 

@@ -43,11 +43,6 @@ class MainActivity1_3 : AppCompatActivity() {
             var startTime = Date().time
             try {
                 Log.i(TAG, "Coroutine is launched")
-                Log.i(TAG, "Seconds (first): $secondsElapsed")
-
-                textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
-                }
 
                 val difMillisecondsAndNextSeconds =
                     if (millisecondsElapsed == 0L) 1000
@@ -55,7 +50,13 @@ class MainActivity1_3 : AppCompatActivity() {
 
                 Log.i(
                     TAG, "DIF between milliseconds " +
-                        "and next seconds: $difMillisecondsAndNextSeconds")
+                            "and next seconds: $difMillisecondsAndNextSeconds")
+
+                Log.i(TAG, "Seconds (first): $secondsElapsed")
+
+                textSecondsElapsed.post {
+                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+                }
 
                 Thread.sleep(difMillisecondsAndNextSeconds)
 

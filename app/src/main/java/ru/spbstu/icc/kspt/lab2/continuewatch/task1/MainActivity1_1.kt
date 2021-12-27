@@ -26,11 +26,6 @@ class MainActivity1_1 : AppCompatActivity() {
         var startTime = Date().time
         try {
             Log.i(TAG, "Thread is launched")
-            Log.i(TAG, "Seconds (first): $secondsElapsed")
-
-            textSecondsElapsed.post {
-                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
-            }
 
             val difMillisecondsAndNextSeconds =
                 if (millisecondsElapsed == 0L) 1000
@@ -38,6 +33,12 @@ class MainActivity1_1 : AppCompatActivity() {
 
             Log.i(TAG, "DIF between milliseconds " +
                     "and next seconds: $difMillisecondsAndNextSeconds")
+
+            Log.i(TAG, "Seconds (first): $secondsElapsed")
+
+            textSecondsElapsed.post {
+                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+            }
 
             Thread.sleep(difMillisecondsAndNextSeconds)
 
@@ -54,7 +55,9 @@ class MainActivity1_1 : AppCompatActivity() {
                 nextDelay = (1000 - correction)
             }
         } catch (ex: InterruptedException) {
-            millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
+            millisecondsElapsed +=
+                (Date().time - startTime) +
+                        (secondsElapsed - millisecondsElapsed.toSeconds()) * 1000
             Log.i(TAG, "Thread is interrupted")
             Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
         }
