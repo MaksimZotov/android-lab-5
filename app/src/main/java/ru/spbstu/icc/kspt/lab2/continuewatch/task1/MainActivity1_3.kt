@@ -73,7 +73,9 @@ class MainActivity1_3 : AppCompatActivity() {
                     nextDelay = (1000 - correction)
                 }
             } catch (ex: CancellationException) {
-                millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
+                millisecondsElapsed +=
+                    (Date().time - startTime) +
+                            (secondsElapsed - millisecondsElapsed.toSeconds()) * 1000
                 Log.i(TAG, "Coroutine is cancelled")
                 Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
             }

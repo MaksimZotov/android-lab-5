@@ -58,7 +58,9 @@ class MainActivity1_2 : AppCompatActivity() {
                 nextDelay = (1000 - correction)
             }
         } catch (ex: InterruptedException) {
-            millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
+            millisecondsElapsed +=
+                (Date().time - startTime) +
+                        (secondsElapsed - millisecondsElapsed.toSeconds()) * 1000
             Log.i(TAG, "Thread is interrupted")
             Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
         }
