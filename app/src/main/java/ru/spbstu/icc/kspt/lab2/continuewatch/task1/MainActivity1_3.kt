@@ -22,7 +22,6 @@ class MainActivity1_3 : AppCompatActivity() {
     private var initMilliseconds = 0L
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
-    private var startTime = 0L
     private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +46,7 @@ class MainActivity1_3 : AppCompatActivity() {
         initMilliseconds = Date().time
         secondsElapsed = millisecondsElapsed.toSeconds()
         job = lifecycleScope.launch(Dispatchers.Main) {
+            var startTime = Date().time
             try {
                 Log.i(TAG, "Coroutine is launched")
 
@@ -65,7 +65,6 @@ class MainActivity1_3 : AppCompatActivity() {
                     textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
                 }
 
-                startTime = Date().time
                 delay(difMillisecondsAndNextSeconds)
 
                 var nextDelay = 1000L
