@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
@@ -39,10 +40,41 @@ class MainActivity1_3 : AppCompatActivity() {
         )
 
         lifecycleScope.launchWhenResumed {
-            while (true) {
-                Log.i(TAG, "Seconds: $secondsElapsed")
-                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed++)
-                delay(1000)
+            var startTime = Date().time
+            try {
+                Log.i(TAG, "Coroutine is launched")
+                Log.i(TAG, "Seconds (first): $secondsElapsed")
+
+                textSecondsElapsed.post {
+                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+                }
+
+                val difMillisecondsAndNextSeconds =
+                    if (millisecondsElapsed == 0L) 1000
+                    else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
+
+                Log.i(
+                    TAG, "DIF between milliseconds " +
+                        "and next seconds: $difMillisecondsAndNextSeconds")
+
+                Thread.sleep(difMillisecondsAndNextSeconds)
+
+                var nextDelay = 1000L
+                while (true) {
+                    Log.i(TAG, "Seconds: ${++secondsElapsed}")
+                    textSecondsElapsed.post {
+                        textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+                    }
+                    startTime = Date().time
+                    Thread.sleep(nextDelay)
+                    val endTime = Date().time
+                    val correction = endTime - startTime - 1000
+                    nextDelay = (1000 - correction)
+                }
+            } catch (ex: CancellationException) {
+                millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
+                Log.i(TAG, "Coroutine is cancelled")
+                Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
             }
         }
     }
@@ -57,7 +89,6 @@ class MainActivity1_3 : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         Log.i(TAG, "onPause")
-        millisecondsElapsed += (Date().time - initMilliseconds)
     }
 
     override fun onStop() {

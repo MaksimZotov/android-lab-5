@@ -12,7 +12,7 @@ import java.util.*
 class MainActivity1_1 : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity1_1"
-        private const val MILLISECONDS_ELAPSED_KEY = "MILLISECONDS_KEY_"
+        private const val MILLISECONDS_ELAPSED_KEY = "MILLISECONDS_KEY"
     }
 
     private lateinit var sharedPreferences: SharedPreferences
