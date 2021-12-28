@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.*
 import ru.spbstu.icc.kspt.lab2.continuewatch.R
 import java.util.*
@@ -21,7 +23,6 @@ class MainActivity1_3 : AppCompatActivity() {
     private lateinit var textSecondsElapsed: TextView
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
-    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,66 +38,65 @@ class MainActivity1_3 : AppCompatActivity() {
             R.string.seconds_elapsed,
             millisecondsElapsed.toSeconds()
         )
-    }
 
-    override fun onResume() {
-        super.onResume()
-        Log.i(TAG, "onResume")
-        secondsElapsed = millisecondsElapsed.toSeconds()
-        job = lifecycleScope.launch(Dispatchers.Main) {
-            Log.i(TAG, "Coroutine is launched")
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                secondsElapsed = millisecondsElapsed.toSeconds()
 
-            val difMillisecondsAndNextSeconds =
-                if (millisecondsElapsed == 0L) 1000
-                else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
+                Log.i(TAG, "Coroutine is launched")
 
-            Log.i(
-                TAG, "DIF between milliseconds " +
+                val difMillisecondsAndNextSeconds =
+                    if (millisecondsElapsed == 0L) 1000
+                    else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
+
+                Log.i(TAG, "DIF between milliseconds " +
                         "and next seconds: $difMillisecondsAndNextSeconds")
 
-            Log.i(TAG, "Seconds (first): $secondsElapsed")
+                Log.i(TAG, "Seconds (first): $secondsElapsed")
 
-            textSecondsElapsed.post {
                 textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
-            }
 
-            var startTime = Date().time
-            try {
-                delay(difMillisecondsAndNextSeconds)
-            } catch (ex: CancellationException) {
-                millisecondsElapsed += (Date().time - startTime)
-                Log.i(TAG, "Coroutine is cancelled")
-                Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
-                return@launch
-            }
-
-            millisecondsElapsed = ((secondsElapsed + 1) * 1000).toLong()
-
-            var nextDelay = 1000L
-            try {
-                while (true) {
-                    Log.i(TAG, "Seconds: ${++secondsElapsed}")
-                    textSecondsElapsed.post {
-                        textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
-                    }
-                    startTime = Date().time
-                    delay(nextDelay)
-                    val endTime = Date().time
-                    val correction = endTime - startTime - 1000
-                    nextDelay = (1000 - correction)
+                var startTime = Date().time
+                try {
+                    delay(difMillisecondsAndNextSeconds)
+                } catch (ex: CancellationException) {
+                    millisecondsElapsed += (Date().time - startTime)
+                    Log.i(TAG, "Coroutine is cancelled")
+                    Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
+                    return@repeatOnLifecycle
                 }
-            } catch (ex: CancellationException) {
-                millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
-                Log.i(TAG, "Coroutine is cancelled")
-                Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
+
+                millisecondsElapsed = ((secondsElapsed + 1) * 1000).toLong()
+
+                var nextDelay = 1000L
+                try {
+                    while (true) {
+                        Log.i(TAG, "Seconds: ${++secondsElapsed}")
+                        textSecondsElapsed.text =
+                            getString(R.string.seconds_elapsed, secondsElapsed)
+                        startTime = Date().time
+                        delay(nextDelay)
+                        val endTime = Date().time
+                        val correction = endTime - startTime - 1000
+                        nextDelay = (1000 - correction)
+                    }
+                } catch (ex: CancellationException) {
+                    millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
+                    Log.i(TAG, "Coroutine is cancelled")
+                    Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
+                }
             }
         }
     }
 
+    override fun onResume() {
+        Log.i(TAG, "onResume")
+        super.onResume()
+    }
+
     override fun onPause() {
-        super.onPause()
         Log.i(TAG, "onPause")
-        job?.cancel()
+        super.onPause()
     }
 
     override fun onStop() {

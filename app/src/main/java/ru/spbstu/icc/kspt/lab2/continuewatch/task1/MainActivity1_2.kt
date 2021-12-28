@@ -30,8 +30,7 @@ class MainActivity1_2 : AppCompatActivity() {
             if (millisecondsElapsed == 0L) 1000
             else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
 
-        Log.i(
-            TAG, "DIF between milliseconds " +
+        Log.i(TAG, "DIF between milliseconds " +
                 "and next seconds: $difMillisecondsAndNextSeconds")
 
         Log.i(TAG, "Seconds (first): $secondsElapsed")
