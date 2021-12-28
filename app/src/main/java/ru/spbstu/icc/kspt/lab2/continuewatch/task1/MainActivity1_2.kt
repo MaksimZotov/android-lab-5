@@ -24,27 +24,36 @@ class MainActivity1_2 : AppCompatActivity() {
 
     private var task: Future<*>? = null
     private val threadRunnable = Runnable {
+        Log.i(TAG, "Thread is launched")
+
+        val difMillisecondsAndNextSeconds =
+            if (millisecondsElapsed == 0L) 1000
+            else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
+
+        Log.i(
+            TAG, "DIF between milliseconds " +
+                "and next seconds: $difMillisecondsAndNextSeconds")
+
+        Log.i(TAG, "Seconds (first): $secondsElapsed")
+
+        textSecondsElapsed.post {
+            textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+        }
+
         var startTime = Date().time
         try {
-            Log.i(TAG, "Thread is launched")
-
-            val difMillisecondsAndNextSeconds =
-                if (millisecondsElapsed == 0L) 1000
-                else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
-
-            Log.i(
-                TAG, "DIF between milliseconds " +
-                    "and next seconds: $difMillisecondsAndNextSeconds")
-
-            Log.i(TAG, "Seconds (first): $secondsElapsed")
-
-            textSecondsElapsed.post {
-                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
-            }
-
             Thread.sleep(difMillisecondsAndNextSeconds)
+        } catch (ex: InterruptedException) {
+            millisecondsElapsed += (Date().time - startTime)
+            Log.i(TAG, "Thread is interrupted")
+            Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
+            return@Runnable
+        }
 
-            var nextDelay = 1000L
+        millisecondsElapsed = ((secondsElapsed + 1) * 1000).toLong()
+
+        var nextDelay = 1000L
+        try {
             while (true) {
                 Log.i(TAG, "Seconds: ${++secondsElapsed}")
                 textSecondsElapsed.post {
@@ -57,9 +66,7 @@ class MainActivity1_2 : AppCompatActivity() {
                 nextDelay = (1000 - correction)
             }
         } catch (ex: InterruptedException) {
-            millisecondsElapsed +=
-                (Date().time - startTime) +
-                        (secondsElapsed - millisecondsElapsed.toSeconds()) * 1000
+            millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
             Log.i(TAG, "Thread is interrupted")
             Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
         }

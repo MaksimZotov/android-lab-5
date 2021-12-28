@@ -44,33 +44,40 @@ class MainActivity1_3 : AppCompatActivity() {
         Log.i(TAG, "onResume")
         secondsElapsed = millisecondsElapsed.toSeconds()
         job = lifecycleScope.launch(Dispatchers.Main) {
+            Log.i(TAG, "Coroutine is launched")
+
+            val difMillisecondsAndNextSeconds =
+                if (millisecondsElapsed == 0L) 1000
+                else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
+
+            Log.i(
+                TAG, "DIF between milliseconds " +
+                        "and next seconds: $difMillisecondsAndNextSeconds")
+
+            Log.i(TAG, "Seconds (first): $secondsElapsed")
+
+            textSecondsElapsed.post {
+                textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
+            }
+
             var startTime = Date().time
             try {
-                Log.i(TAG, "Coroutine is launched")
-
-                val difMillisecondsAndNextSeconds =
-                    if (millisecondsElapsed == 0L) 1000
-                    else 1000 - (millisecondsElapsed - secondsElapsed * 1000)
-
-                Log.i(
-                    TAG, "DIF between milliseconds " +
-                            "and next seconds: $difMillisecondsAndNextSeconds"
-                )
-
-                Log.i(TAG, "Seconds (first): $secondsElapsed")
-
-                textSecondsElapsed.post {
-                    textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
-                }
-
                 delay(difMillisecondsAndNextSeconds)
+            } catch (ex: CancellationException) {
+                millisecondsElapsed += (Date().time - startTime)
+                Log.i(TAG, "Coroutine is cancelled")
+                Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
+                return@launch
+            }
 
-                var nextDelay = 1000L
+            millisecondsElapsed = ((secondsElapsed + 1) * 1000).toLong()
+
+            var nextDelay = 1000L
+            try {
                 while (true) {
                     Log.i(TAG, "Seconds: ${++secondsElapsed}")
                     textSecondsElapsed.post {
-                        textSecondsElapsed.text =
-                            getString(R.string.seconds_elapsed, secondsElapsed)
+                        textSecondsElapsed.text = getString(R.string.seconds_elapsed, secondsElapsed)
                     }
                     startTime = Date().time
                     delay(nextDelay)
@@ -79,9 +86,7 @@ class MainActivity1_3 : AppCompatActivity() {
                     nextDelay = (1000 - correction)
                 }
             } catch (ex: CancellationException) {
-                millisecondsElapsed +=
-                    (Date().time - startTime) +
-                            (secondsElapsed - millisecondsElapsed.toSeconds()) * 1000
+                millisecondsElapsed = (Date().time - startTime) + secondsElapsed * 1000
                 Log.i(TAG, "Coroutine is cancelled")
                 Log.i(TAG, "Elapsed milliseconds: $millisecondsElapsed")
             }
