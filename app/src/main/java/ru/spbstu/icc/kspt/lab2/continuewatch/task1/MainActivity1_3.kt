@@ -19,7 +19,6 @@ class MainActivity1_3 : AppCompatActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var textSecondsElapsed: TextView
-    private var initMilliseconds = 0L
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
     private var job: Job? = null
@@ -43,7 +42,6 @@ class MainActivity1_3 : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "onResume")
-        initMilliseconds = Date().time
         secondsElapsed = millisecondsElapsed.toSeconds()
         job = lifecycleScope.launch(Dispatchers.Main) {
             var startTime = Date().time

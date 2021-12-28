@@ -17,7 +17,6 @@ class MainActivity1_1 : AppCompatActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var textSecondsElapsed: TextView
-    private var initMilliseconds = 0L
     private var millisecondsElapsed = 0L
     private var secondsElapsed = 0
 
@@ -81,7 +80,6 @@ class MainActivity1_1 : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "onResume")
-        initMilliseconds = Date().time
         secondsElapsed = millisecondsElapsed.toSeconds()
         backgroundThread = Thread(threadRunnable).apply { start() }
     }
